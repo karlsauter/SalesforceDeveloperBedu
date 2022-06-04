@@ -1,6 +1,18 @@
-public with sharing class QuotationHelper {
+public with sharing class QuotationHelper implements QuotationSync {
     public QuotationHelper() {
 
+    }
+
+    public Boolean confirmProductExistByCode(String code) {
+        return this.getProductsByCode(code).isEmpty();
+    }
+
+    public Integer searchProductByCode(String code) {
+        return this.getProductsByCode(code).size();
+    }
+
+    private Products[] getProductsByCode(String code) {
+        return [SELECT Id FROM Product2 WHERE ExternalId = :code];
     }
 
     public void initialConfig() {
