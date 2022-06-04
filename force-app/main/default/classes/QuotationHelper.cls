@@ -4,14 +4,14 @@ public with sharing class QuotationHelper implements QuotationSync {
     }
 
     public Boolean confirmProductExistByCode(String code) {
-        return this.getProductsByCode(code).isEmpty();
+        return getProductsByCode(code).isEmpty();
     }
 
     public Integer searchProductByCode(String code) {
-        return this.getProductsByCode(code).size();
+        return getProductsByCode(code).size();
     }
 
-    private Products[] getProductsByCode(String code) {
+    private Product2[] getProductsByCode(String code) {
         return [SELECT Id FROM Product2 WHERE ExternalId = :code];
     }
 
