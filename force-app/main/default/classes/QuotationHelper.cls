@@ -4,15 +4,22 @@ public with sharing class QuotationHelper implements QuotationSync {
     }
 
     public Boolean confirmProductExistByCode(String code) {
-        return getProductsByCode(code).isEmpty();
+        Product2[] product = [
+            SELECT Id 
+            FROM Product2 
+            WHERE ExternalId = :code];
+        return !product.isEmpty();
     }
 
     public Integer searchProductByCode(String code) {
-        return getProductsByCode(code).size();
-    }
+        Inventory__c[] inventory = [
+            SELECT Id,Available_Quantity__c,Reserved_Quantity__c 
+            FROM Inventory__c
+            WHERE Product_Code__c = :code];
 
-    private Product2[] getProductsByCode(String code) {
-        return [SELECT Id FROM Product2 WHERE ExternalId = :code];
+        return inventory.isEmpty() ? 
+            0 : 
+            (Integer)(inventory[0].Available_Quantity__c - inventory[0].Reserved_Quantity__c);
     }
 
     public void initialConfig() {
