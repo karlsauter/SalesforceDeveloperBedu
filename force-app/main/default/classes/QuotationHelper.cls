@@ -31,12 +31,11 @@ public with sharing class QuotationHelper implements QuotationSync {
     }
 
     //Adds quantity to the Reserved_Quantity__c field quantity of Product is available
-    public void reserveProductQuantity(List<QuoteLineItem> items, List<QuoteLineItem> deletedItems, Boolean isBefore, Boolean isAfter, Boolean isDelete) {
+    public void reserveProductQuantity(List<QuoteLineItem> items, Boolean isBefore, Boolean isAfter) {
         
         Set<Id> productIds = new Set<Id>();
-        List<QuoteLineItem> itemsToProcess = isDelete ? deletedItems : items;
     
-        for (QuoteLineItem item : itemsToProcess) {
+        for (QuoteLineItem item : items) {
             productIds.add(item.Product2Id);
         }
 
@@ -49,7 +48,7 @@ public with sharing class QuotationHelper implements QuotationSync {
         ]);
 
         if (isBefore) {
-            for (QuoteLineItem item : itemsToProcess) {
+            for (QuoteLineItem item : items) {
                 if (item.Quantity > searchProductByCode(productsMap.get(item.Product2Id).ExternalId)) {
                     item.addError('Quantity cannot be greater than the Product\'s Available Quantity');
                 }
@@ -58,22 +57,15 @@ public with sharing class QuotationHelper implements QuotationSync {
             
             List<Inventory__c> inventoriesToUpdate = new List<Inventory__c>();
             
-            for (QuoteLineItem item : itemsToProcess) {
+            for (QuoteLineItem item : items) {
                 
                 Inventory__c inventoryToUpdate = productsMap.get(item.Product2Id).Inventories__r[0];
-                if (!isDelete) {
-                    inventoryToUpdate.Reserved_Quantity__c += item.Quantity;
-                } else if (item.Quantity <= inventoryToUpdate.Reserved_Quantity__c) {
-                    inventoryToUpdate.Reserved_Quantity__c -= item.Quantity;
-                } else {
-                    item.addError('Can\'t delete record. Item Quantity is greater than Reserved Quantity.');
-                }
+                inventoryToUpdate.Reserved_Quantity__c += item.Quantity;
                 inventoriesToUpdate.add(inventoryToUpdate);
             }
 
             update inventoriesToUpdate;
         }
-        
     }
 
     @invocableMethod(label = 'Stock Empty Alert')
@@ -130,12 +122,13 @@ public with sharing class QuotationHelper implements QuotationSync {
         }
     }
 
-    public static List<Inventory__c> productsInInventory() {
+    private static List<Inventory__c> productsInInventory() {
         
         Inventory__c[] inventories = [
             SELECT Name, Product__r.Name, Product_Code__c, Available_Quantity__c, Reserved_Quantity__c, Last_Stock_Alert__c
             FROM Inventory__c
-            LIMIT 200];
+            LIMIT 200
+        ];
 
         return inventories;
     }
