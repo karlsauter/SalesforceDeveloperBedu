@@ -122,7 +122,7 @@ public with sharing class QuotationHelper implements QuotationSync {
         }
     }
 
-    private static List<Inventory__c> productsInInventory() {
+    public static List<Inventory__c> productsInInventory() {
         
         Inventory__c[] inventories = [
             SELECT Name, Product__r.Name, Product_Code__c, Available_Quantity__c, Reserved_Quantity__c, Last_Stock_Alert__c
