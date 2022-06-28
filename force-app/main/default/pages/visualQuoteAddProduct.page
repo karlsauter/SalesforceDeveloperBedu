@@ -1,0 +1,22 @@
+<apex:page lightningStylesheets="true" standardController="Quote" extensions="CustomWebInventoryController" docType="html-5.0">
+    <apex:pageBlock title="Buscar un producto">
+        <apex:pageMessages />
+        <apex:form>
+            <apex:outputLabel value="Código de producto:" for="searchField" />
+            <apex:inputText id="searchField" value="{! code }" />
+            <apex:commandButton action="{! search }" value="Search" id="searchButton" />
+            <apex:commandButton action="{! clear }" value="Clean" id="clearButton" />
+        </apex:form>
+    </apex:pageBlock>
+    <apex:pageBlock title="Detalles del producto" rendered="{! detailsVisible }">
+        <apex:form>
+            <apex:outputText value="Product Name: {! name }" /><br />
+            <apex:outputText value="Product Code: {! externalId }" /><br />
+            <apex:outputText value="List Price: {! price }" /><br />
+            <apex:outputLabel value="Quantity: " for="quantityInput" />
+            <apex:input type="number" required="true" value="{! quantity }" id="quantityInput" /><br />
+            <apex:outputText value="Available: {! available }" /><br />    
+            <apex:commandButton action="{! save }" value="Save" id="saveButton" />
+        </apex:form>
+    </apex:pageBlock>
+</apex:page>
