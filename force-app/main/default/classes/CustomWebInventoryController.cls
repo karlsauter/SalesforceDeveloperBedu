@@ -14,6 +14,7 @@ public with sharing class CustomWebInventoryController {
     
     public CustomWebInventoryController(ApexPages.StandardController controller) {
         this.parent = (Quote) controller.getRecord();
+        this.detailsVisible = false;
         this.quantity = 0;
     }
 
@@ -25,24 +26,11 @@ public with sharing class CustomWebInventoryController {
             this.name = products[0].Name;
             this.externalId = products[0].ExternalId;
             this.price = products[0].PricebookEntries[0].UnitPrice;
+            this.priceBookEntryId = products[0].PricebookEntries[0].Id;
             this.available = (Integer)
                 (products[0].Inventories__r[0].Available_Quantity__c - 
                 products[0].Inventories__r[0].Reserved_Quantity__c);
             this.detailsVisible = true;
-
-            //Buscar el productEntryId
-            String productId = products[0].Id;
-            List<PricebookEntry> pbentry = [
-                SELECT Id
-                FROM PricebookEntry 
-                WHERE Pricebook2Id = :priceBookId AND Product2Id = :productId];
-            if(pbentry.size() > 0) {
-                this.priceBookEntryId = pbentry[0].Id;
-            } else {
-                String error = 'The product has no entry in the Price Book';
-                ApexPages.Message message = new ApexPages.Message(ApexPages.severity.ERROR, error);
-                ApexPages.addMessage(message);                     
-            }
         } else {
             String error = 'No products with that code';
             ApexPages.Message message = new ApexPages.Message(ApexPages.severity.ERROR, error);
@@ -68,11 +56,11 @@ public with sharing class CustomWebInventoryController {
             } catch (DmlException e) {
                 String error = 'There was a problem creating the record';
                 ApexPages.Message message = new ApexPages.Message(ApexPages.severity.ERROR, error);
-                ApexPages.addMessage(message);    
+                ApexPages.addMessage(message);
             }
-            String error = 'Record was inserted';
-            ApexPages.Message message = new ApexPages.Message(ApexPages.severity.CONFIRM, error);
-            ApexPages.addMessage(message);    
+            String confirm = 'Record was inserted';
+            ApexPages.Message message = new ApexPages.Message(ApexPages.severity.CONFIRM, confirm);
+            ApexPages.addMessage(message);
             this.clear();
         } else {
             String error = 'Quantity must more than 0 and less than Available';
@@ -81,22 +69,26 @@ public with sharing class CustomWebInventoryController {
         }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Product2> searchProducts(String productCode, Id quoteId) {
-        List<Quote> quote = [SELECT Pricebook2Id FROM Quote WHERE Id = :quoteId];
+        try {
+            List<Quote> quote = [SELECT Pricebook2Id FROM Quote WHERE Id = :quoteId];
         
-        priceBookId = quote[0].Pricebook2Id;
-
-        return [
-            SELECT Id, Name, ExternalId, (
-                SELECT UnitPrice 
-                FROM PricebookEntries
-                WHERE Pricebook2Id = :priceBookId), (
-                SELECT Available_Quantity__c, Reserved_Quantity__c
-                FROM Inventories__r
-                )
-            FROM Product2
-            WHERE ExternalId = :productCode
-        ];
+            priceBookId = quote[0].Pricebook2Id;
+    
+            return [
+                SELECT Id, Name, ExternalId, (
+                    SELECT Id, UnitPrice 
+                    FROM PricebookEntries
+                    WHERE Pricebook2Id = :priceBookId), (
+                    SELECT Available_Quantity__c, Reserved_Quantity__c
+                    FROM Inventories__r
+                    )
+                FROM Product2
+                WHERE ExternalId = :productCode
+            ];    
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
     }
 }
