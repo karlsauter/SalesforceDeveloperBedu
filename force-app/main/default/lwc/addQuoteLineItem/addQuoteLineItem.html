@@ -1,54 +1,16 @@
 <template>
     <lightning-card title="Add Line Item" icon-name="standard:quotes">
         <div class="slds-var-m-around_medium">
-            <!--Search field-->
-            <lightning-layout vertical-align="end" class="slds-var-m-bottom_small">
-                <lightning-layout-item flexibility="grow">
-                    <div onkeyup={handleKeyUp}>
-                        <lightning-input 
-                            name="productCode"
-                            type="search"
-                            onchange={handleChange}
-                            label="Search"
-                            value={fields.productCode}
-                            placeholder="Enter Product Code">
-                        </lightning-input>
-                    </div>
-                </lightning-layout-item>
-                <lightning-layout-item class="slds-var-p-left_xx-small">
-                    <lightning-button 
-                        label="Search" 
-                        onclick={handleSearch}></lightning-button>
-                </lightning-layout-item>
-            </lightning-layout>
+            <c-search-box onsearch={handleSearch} product-code={productCode}></c-search-box>
             <!--Product info-->
             <template if:true={product}>
-                <div class="slds-form-element slds-form-element_readonly">
-                    <span class="slds-form-element__label">Product</span>
-                    <div class="slds-form-element__control">
-                        <div class="slds-form-element__static">{product.Name}</div>
-                    </div>
-                </div>    
-                <div class="slds-form-element slds-form-element_readonly">
-                    <span class="slds-form-element__label">Price</span>
-                    <div class="slds-form-element__control">
-                        <div class="slds-form-element__static">{product.Price}</div>
-                    </div>
-                </div>
-                <div class="slds-form-element slds-form-element_readonly">
-                    <span class="slds-form-element__label">Available</span>
-                    <div class="slds-form-element__control">
-                        <div class="slds-form-element__static">{product.Available}</div>
-                    </div>
-                </div>
-                <div class="slds-form-element slds-form-element_readonly">
-                    <span class="slds-form-element__label">Code</span>
-                    <div class="slds-form-element__control">
-                        <div class="slds-form-element__static">{product.ExternalId}</div>
-                    </div>
-                </div>
+                <c-output-field label="Product" value={product.Name}></c-output-field>
+                <c-output-field label="Price" value={product.Price}></c-output-field>
+                <c-output-field label="Available" value={product.Available}></c-output-field>
+                <c-output-field label="Code" value={product.ExternalId}></c-output-field>
                 <lightning-input name="quantity" label="Quantity" type="number" value={fields.quantity} step="1" min="1" max={product.Available} onchange={handleChange} required></lightning-input>
             </template>
+            <!--Errors-->
             <template if:true={notFound}>
                 <p class="slds-text-color_destructive">{notFound}</p>
             </template>
@@ -56,6 +18,7 @@
                 <c-error-panel errors={error} type="inlineMessage"></c-error-panel>
             </template>
         </div>
+        <!--Footer buttons-->
         <template if:true={product}>
             <div slot="footer">
                 <lightning-button label="Cancel" onclick={handleReset}></lightning-button>                        

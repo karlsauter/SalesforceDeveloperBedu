@@ -19,9 +19,9 @@ export default class AddQuoteLineItem extends LightningElement {
     @api recordId;
     notFound;
     error;
-
+    productCode = '';
+    quantity = '';
     @track fields = {
-        productCode: '',
         quantity: ''
     }
 
@@ -53,24 +53,14 @@ export default class AddQuoteLineItem extends LightningElement {
         return this._product;
     }
 
-
-
     handleChange(e) {
-        const name = e.target.name;
-        const value = e.target.value;
-        this.fields[name] = value;
+        this.quantity = e.target.value;
     }
 
-    handleKeyUp(e) {
-        const isEnterKey = e.keyCode === 13;
-        if (isEnterKey) {
-            this.handleSearch();
-        }
-    }
-
-    handleSearch() {
-        if (this.fields.productCode !== '') {
-            searchProducts({ productCode: this.fields.productCode, quoteId: this.recordId  })
+    handleSearch(e) {
+        this.productCode = e.detail;
+        if (this.productCode !== '') {
+            searchProducts({ productCode: this.productCode, quoteId: this.recordId  })
             .then((result) => {
                 if (result && result.length > 0) {
                     this.clearFields();
@@ -95,14 +85,14 @@ export default class AddQuoteLineItem extends LightningElement {
 
     handleReset() {
         this.clearFields();
-        this.fields.productCode = '';
+        this.productCode = '';
     }
 
     clearFields() {
         this.product = undefined;
         this.error = undefined;
         this.notFound = undefined;
-        this.fields.quantity = '';
+        this.quantity = '';
     }
 
     handleAddProduct() {
@@ -116,7 +106,7 @@ export default class AddQuoteLineItem extends LightningElement {
             fields[PRODUCTID_FIELD.fieldApiName] = this.product.Id;
             fields[QUOTEID_FIELD.fieldApiName] = this.recordId;
             fields[PBEID_FIELD.fieldApiName] = this.pricebookEntryId;
-            fields[QUANTITY_FIELD.fieldApiName] = parseInt(this.fields.quantity);
+            fields[QUANTITY_FIELD.fieldApiName] = parseInt(this.quantity);
             fields[UNITPRICE_FIELD.fieldApiName] = this.unitPrice;
             const recordInput = { apiName: QLI_OBJECT.objectApiName, fields };
 
@@ -131,7 +121,7 @@ export default class AddQuoteLineItem extends LightningElement {
                     );
                     eval("$A.get('e.force:refreshView').fire();");
                     this.clearFields();
-                    this.fields.productCode = '';
+                    this.productCode = '';
                 })
                 .catch(error => {
                     this.dispatchEvent(

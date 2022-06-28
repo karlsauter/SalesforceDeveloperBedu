@@ -1,0 +1,21 @@
+<template>
+    <lightning-layout vertical-align="end" class="slds-var-m-bottom_small">
+        <lightning-layout-item flexibility="grow">
+            <div onkeyup={handleKeyUp}>
+                <lightning-input 
+                    name="productCode"
+                    type="search"
+                    onchange={handleChange}
+                    label="Search"
+                    value={productCode}
+                    placeholder="Enter Product Code">
+                </lightning-input>
+            </div>
+        </lightning-layout-item>
+        <lightning-layout-item class="slds-var-p-left_xx-small">
+            <lightning-button 
+                label="Search" 
+                onclick={handleSearch}></lightning-button>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>
